@@ -5,11 +5,22 @@ using Xunit;
 
 namespace StandardTools.Api.Tests;
 
+// Env vars (SQT_AUTH_ENABLED / SQT_API_KEY) are process-wide, so all
+// WebApplicationFactory-based tests share one non-parallelized collection.
+[CollectionDefinition("Api", DisableParallelization = true)]
+public sealed class ApiCollectionDefinition;
+
+[Collection("Api")]
 public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
 
-    public ApiIntegrationTests(WebApplicationFactory<Program> factory) => _factory = factory;
+    public ApiIntegrationTests(WebApplicationFactory<Program> factory)
+    {
+        // These tests exercise endpoints, not auth; disable it before the host is built.
+        Environment.SetEnvironmentVariable("SQT_AUTH_ENABLED", "false");
+        _factory = factory;
+    }
 
     private HttpClient Client => _factory.CreateClient();
 

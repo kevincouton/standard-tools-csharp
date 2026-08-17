@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using StandardTools.Agent;
@@ -18,6 +19,18 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
+// Auth configuration: enabled by default, fails closed when the key is missing.
+var authEnabled = !string.Equals(
+    Environment.GetEnvironmentVariable("SQT_AUTH_ENABLED"), "false",
+    StringComparison.OrdinalIgnoreCase);
+var apiKey = Environment.GetEnvironmentVariable("SQT_API_KEY");
+if (authEnabled && string.IsNullOrEmpty(apiKey))
+{
+    throw new InvalidOperationException(
+        "SQT_AUTH_ENABLED is true (the default) but SQT_API_KEY is not set. " +
+        "Set SQT_API_KEY, or explicitly set SQT_AUTH_ENABLED=false for local development.");
+}
+
 // Register domain services as singletons.
 builder.Services.AddSingleton<IndicatorCalculator>();
 builder.Services.AddSingleton<MetricsCalculator>();
@@ -29,6 +42,32 @@ builder.Services.AddSingleton<AuditReplay>();
 builder.Services.AddSingleton<AgentDispatcher>();
 
 var app = builder.Build();
+
+// API-key middleware: every request except /health must present x-api-key.
+app.Use(async (context, next) =>
+{
+    if (!authEnabled || context.Request.Path.StartsWithSegments("/health"))
+    {
+        await next();
+        return;
+    }
+
+    var provided = context.Request.Headers["x-api-key"].FirstOrDefault();
+    var valid = provided is not null
+        && provided.Length == apiKey!.Length
+        && CryptographicOperations.FixedTimeEquals(
+            System.Text.Encoding.UTF8.GetBytes(provided),
+            System.Text.Encoding.UTF8.GetBytes(apiKey));
+
+    if (!valid)
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        await context.Response.WriteAsJsonAsync(new { error = "missing or invalid x-api-key" });
+        return;
+    }
+
+    await next();
+});
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
