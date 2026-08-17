@@ -35,7 +35,7 @@ This document compares the `standard-tools-csharp` port against the other Standa
 | Monte Carlo simulation | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Robustness / stress testing | ❌ | ✅ | ❌ | ✅ | ❌ |
 | Portfolio mean-variance | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Portfolio risk parity | ⚠️ inverse-vol | ✅ | ⚠️ inverse-vol | ⚠️ inverse-vol | ✅ equal-risk-contribution |
+| Portfolio risk parity | ⚠️ inverse-vol | ✅ equal-risk-contribution | ✅ equal-risk-contribution | ✅ equal-risk-contribution | ✅ equal-risk-contribution |
 | Black-Litterman | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Screener | ⚠️ hardcoded provider | ⚠️ hardcoded provider | ⚠️ hardcoded provider | ⚠️ hardcoded provider | ⚠️ hardcoded provider |
 | Hash-chained audit | ✅ | ✅ | ✅ | ✅ | ✅ |
