@@ -76,8 +76,8 @@ Validation below was performed locally with `nektos/act` on `linux/arm64` (Podma
 | C# | ✅ green | `act push --job build-and-test` passes (`dotnet test` 88 tests) |
 | Kotlin | ✅ green | `act push --job unit-tests` passes; native build not validated locally |
 | Go | ✅ green | `act push --job quality` passes |
-| Rust | ⚠️ pending | `quality` job passes; `test` job fixed to skip artifact upload under `env.ACT` and is re-running |
-| C++ | ⚠️ pending | `quality` job is running |
+| Rust | ✅ green | `act push --job test` passes; artifact upload skipped under `env.ACT` |
+| C++ | ✅ green | `act push --job quality` passes (build + ctest)
 
 ## Known limitations relevant to this port
 
