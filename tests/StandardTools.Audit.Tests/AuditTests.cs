@@ -184,9 +184,10 @@ public class AuditTests
     [Fact]
     public async Task Writer_ConcurrentWrites_MaintainsChainIntegrity()
     {
-        var storage = new InMemoryAuditStorage();
+        var inner = new InMemoryAuditStorage();
+        var storage = new YieldingAuditStorage(inner);
         var writer = new AuditWriter(storage);
-        var verifier = new AuditVerifier(storage);
+        var verifier = new AuditVerifier(inner);
 
         const int n = 100;
         var tasks = Enumerable.Range(0, n)
@@ -199,7 +200,7 @@ public class AuditTests
         var records = new List<DecisionRecord>();
         for (var i = 0; i < n; i++)
         {
-            records.Add(await storage.GetByRequestIDAsync($"r{i}"));
+            records.Add(await inner.GetByRequestIDAsync($"r{i}"));
         }
 
         var prevCounts = records
@@ -208,6 +209,40 @@ public class AuditTests
             .ToDictionary(g => g.Key, g => g.Count());
 
         Assert.All(prevCounts.Values, count => Assert.Equal(1, count));
+    }
+
+    /// <summary>
+    /// Storage decorator that yields between operations to expose read-then-write races.
+    /// </summary>
+    private sealed class YieldingAuditStorage : IAuditStorage
+    {
+        private readonly IAuditStorage _inner;
+
+        public YieldingAuditStorage(IAuditStorage inner) => _inner = inner;
+
+        public async Task<DecisionRecord> LatestAsync(CancellationToken cancellationToken = default)
+        {
+            await Task.Yield();
+            return await _inner.LatestAsync(cancellationToken);
+        }
+
+        public async Task AppendAsync(DecisionRecord record, CancellationToken cancellationToken = default)
+        {
+            await Task.Yield();
+            await _inner.AppendAsync(record, cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<DecisionRecord>> AllAsync(CancellationToken cancellationToken = default)
+        {
+            await Task.Yield();
+            return await _inner.AllAsync(cancellationToken);
+        }
+
+        public async Task<DecisionRecord> GetByRequestIDAsync(string requestID, CancellationToken cancellationToken = default)
+        {
+            await Task.Yield();
+            return await _inner.GetByRequestIDAsync(requestID, cancellationToken);
+        }
     }
 
     [Fact]

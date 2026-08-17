@@ -11,7 +11,7 @@ namespace StandardTools.Audit;
 public sealed class AuditWriter
 {
     private readonly IAuditStorage _storage;
-    private readonly Lock _lock = new();
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public AuditWriter(IAuditStorage storage)
     {
@@ -25,42 +25,45 @@ public sealed class AuditWriter
     {
         ArgumentNullException.ThrowIfNull(record);
 
-        lock (_lock)
+        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
         {
-            // Only one write at a time to prevent forked chains.
+            var recordedAt = record.RecordedAt == default ? DateTime.UtcNow : record.RecordedAt.ToUniversalTime();
+
+            var latest = await GetLatestOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            var prevRecordHash = latest?.RecordHash ?? string.Empty;
+
+            var (inputCanonical, inputHash) = CanonicalizeAndHash(record.Input);
+            var (outputCanonical, outputHash) = CanonicalizeAndHash(record.Output);
+
+            var recordHash = HashRecord(record with
+            {
+                RecordedAt = recordedAt,
+                Input = inputCanonical,
+                InputHash = inputHash,
+                Output = outputCanonical,
+                OutputHash = outputHash,
+                PrevRecordHash = prevRecordHash,
+                RecordHash = string.Empty
+            });
+
+            var toStore = record with
+            {
+                RecordedAt = recordedAt,
+                Input = inputCanonical,
+                InputHash = inputHash,
+                Output = outputCanonical,
+                OutputHash = outputHash,
+                PrevRecordHash = prevRecordHash,
+                RecordHash = recordHash
+            };
+
+            await _storage.AppendAsync(toStore, cancellationToken).ConfigureAwait(false);
         }
-
-        var recordedAt = record.RecordedAt == default ? DateTime.UtcNow : record.RecordedAt.ToUniversalTime();
-
-        var latest = await GetLatestOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-        var prevRecordHash = latest?.RecordHash ?? string.Empty;
-
-        var (inputCanonical, inputHash) = CanonicalizeAndHash(record.Input);
-        var (outputCanonical, outputHash) = CanonicalizeAndHash(record.Output);
-
-        var recordHash = HashRecord(record with
+        finally
         {
-            RecordedAt = recordedAt,
-            Input = inputCanonical,
-            InputHash = inputHash,
-            Output = outputCanonical,
-            OutputHash = outputHash,
-            PrevRecordHash = prevRecordHash,
-            RecordHash = string.Empty
-        });
-
-        var toStore = record with
-        {
-            RecordedAt = recordedAt,
-            Input = inputCanonical,
-            InputHash = inputHash,
-            Output = outputCanonical,
-            OutputHash = outputHash,
-            PrevRecordHash = prevRecordHash,
-            RecordHash = recordHash
-        };
-
-        await _storage.AppendAsync(toStore, cancellationToken).ConfigureAwait(false);
+            _semaphore.Release();
+        }
     }
 
     private async Task<DecisionRecord?> GetLatestOrDefaultAsync(CancellationToken cancellationToken)
