@@ -50,7 +50,7 @@ This document compares the `standard-tools-csharp` port against the other Standa
 | TLS termination | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Audit provenance (git commit / version / seed) | ⚠️ schema only | ⚠️ commit + version | ✅ all three | ❌ none recorded | ✅ all three |
 | Replay read-only / side-effect blocklist | ❌ not implemented | ✅ blocklist | ❌ re-executes | ⚠️ blocklist, CLI placeholder | ⚠️ read-only fetch, no re-execution |
-| Persistent audit storage | ❌ in-memory only | ✅ PostgreSQL | ✅ PostgreSQL + memory | ✅ PostgreSQL + memory | ✅ PostgreSQL + memory |
+| Persistent audit storage | ✅ SQLite + memory | ✅ PostgreSQL | ✅ PostgreSQL + memory | ✅ PostgreSQL + memory | ✅ PostgreSQL + memory |
 
 ## Operational hardening
 
@@ -81,7 +81,6 @@ This document compares the `standard-tools-csharp` port against the other Standa
 
 - No gRPC, A2A, MCP, Docker, or CLI surfaces.
 - Market-data endpoint echoes parsed parameters rather than fetching live data.
-- Audit storage is in-memory only; records do not survive process restart.
 - Audit provenance fields (`git_commit_sha`, `package_version`, `random_seed`) are defined but not populated by the API.
 - Risk-parity weights are inverse-volatility, not equal-risk-contribution.
 - PCA uses power iteration with fixed iterations and no convergence check.

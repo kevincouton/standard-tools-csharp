@@ -48,7 +48,17 @@ if (authEnabled && string.IsNullOrEmpty(apiKey))
 builder.Services.AddSingleton<IndicatorCalculator>();
 builder.Services.AddSingleton<MetricsCalculator>();
 builder.Services.AddSingleton<AnalysisCalculator>();
-builder.Services.AddSingleton<IAuditStorage, InMemoryAuditStorage>();
+
+var auditConnectionString = Environment.GetEnvironmentVariable("SQT_AUDIT_DATABASE");
+if (!string.IsNullOrWhiteSpace(auditConnectionString))
+{
+    builder.Services.AddSingleton<IAuditStorage>(_ => new SqliteAuditStorage(auditConnectionString));
+}
+else
+{
+    builder.Services.AddSingleton<IAuditStorage, InMemoryAuditStorage>();
+}
+
 builder.Services.AddSingleton<AuditWriter>();
 builder.Services.AddSingleton<AuditVerifier>();
 builder.Services.AddSingleton<AuditReplay>();

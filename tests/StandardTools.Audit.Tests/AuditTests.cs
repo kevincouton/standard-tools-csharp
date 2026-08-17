@@ -257,4 +257,90 @@ public class AuditTests
         Assert.IsType<JsonElement>(stored.Input);
         Assert.IsType<JsonElement>(stored.Output);
     }
+
+    [Fact]
+    public async Task SqliteStorage_ChainsRecords()
+    {
+        var storage = SqliteAuditStorage.CreateInMemory();
+        var writer = new AuditWriter(storage);
+
+        await writer.WriteAsync(SampleRecord("r1"));
+        var stored1 = await storage.LatestAsync();
+        Assert.NotEmpty(stored1.RecordHash);
+        Assert.Empty(stored1.PrevRecordHash);
+
+        await writer.WriteAsync(SampleRecord("r2"));
+        var stored2 = await storage.LatestAsync();
+        Assert.Equal(stored1.RecordHash, stored2.PrevRecordHash);
+        Assert.NotEqual(stored1.RecordHash, stored2.RecordHash);
+    }
+
+    [Fact]
+    public async Task SqliteStorage_GetByRequestID_ReturnsRecord()
+    {
+        var storage = SqliteAuditStorage.CreateInMemory();
+        var writer = new AuditWriter(storage);
+
+        await writer.WriteAsync(SampleRecord("r1"));
+        await writer.WriteAsync(SampleRecord("r2"));
+
+        var found = await storage.GetByRequestIDAsync("r1");
+        Assert.Equal("r1", found.RequestID);
+
+        await Assert.ThrowsAsync<AuditNotFoundException>(() => storage.GetByRequestIDAsync("unknown"));
+    }
+
+    [Fact]
+    public async Task SqliteStorage_All_ReturnsRecordsInOrder()
+    {
+        var storage = SqliteAuditStorage.CreateInMemory();
+        var writer = new AuditWriter(storage);
+
+        await writer.WriteAsync(SampleRecord("r1"));
+        await writer.WriteAsync(SampleRecord("r2"));
+
+        var all = await storage.AllAsync();
+        Assert.Equal(2, all.Count);
+        Assert.Equal("r1", all[0].RequestID);
+        Assert.Equal("r2", all[1].RequestID);
+    }
+
+    [Fact]
+    public async Task SqliteStorage_LatestNotFound_Throws()
+    {
+        var storage = SqliteAuditStorage.CreateInMemory();
+        await Assert.ThrowsAsync<AuditNotFoundException>(() => storage.LatestAsync());
+    }
+
+    [Fact]
+    public async Task SqliteStorage_Verifier_ValidChain_Passes()
+    {
+        var storage = SqliteAuditStorage.CreateInMemory();
+        var writer = new AuditWriter(storage);
+        var verifier = new AuditVerifier(storage);
+
+        await writer.WriteAsync(SampleRecord("r1"));
+        await writer.WriteAsync(SampleRecord("r2"));
+
+        await verifier.VerifyChainAsync();
+    }
+
+    [Fact]
+    public async Task SqliteStorage_ConcurrentWrites_MaintainsChainIntegrity()
+    {
+        var storage = SqliteAuditStorage.CreateInMemory();
+        var writer = new AuditWriter(storage);
+        var verifier = new AuditVerifier(storage);
+
+        const int n = 50;
+        var tasks = Enumerable.Range(0, n)
+            .Select(i => writer.WriteAsync(SampleRecord($"r{i}")))
+            .ToArray();
+        await Task.WhenAll(tasks);
+
+        await verifier.VerifyChainAsync();
+
+        var all = await storage.AllAsync();
+        Assert.Equal(n, all.Count);
+    }
 }
