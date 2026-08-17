@@ -29,7 +29,7 @@ This document compares the `standard-tools-csharp` port against the other Standa
 | Market data provider port | ⚠️ interface / stub | ✅ YF, Polygon, Bloomberg stub | ✅ synthetic, YF, Polygon | ✅ YF + Moka cache | ⚠️ synthetic only |
 | Indicators | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Risk / return metrics | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Analysis (regression, cointegration, Hurst, PCA, correlation, options) | ✅ library; ⚠️ only regression + options exposed | ✅ | ⚠️ no multi-factor | ⚠️ no multi-factor | ⚠️ no multi-factor |
+| Analysis (regression, cointegration, Hurst, PCA, correlation, options) | ✅ library; ⚠️ only regression + options exposed | ✅ | ⚠️ no multi-factor | ✅ | ⚠️ no multi-factor |
 | Backtesting engine | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Walk-forward optimization | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Monte Carlo simulation | ✅ | ✅ | ✅ | ✅ | ✅ |
