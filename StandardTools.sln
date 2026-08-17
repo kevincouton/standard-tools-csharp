@@ -26,6 +26,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardTools.Analysis", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardTools.Analysis.Tests", "tests\StandardTools.Analysis.Tests\StandardTools.Analysis.Tests.csproj", "{5E6A17F7-2112-49F5-8A69-A155DB0C2646}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardTools.Backtest", "src\StandardTools.Backtest\StandardTools.Backtest.csproj", "{F583BF2E-2287-490E-893A-8EC73448EB2A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StandardTools.Backtest.Tests", "tests\StandardTools.Backtest.Tests\StandardTools.Backtest.Tests.csproj", "{2A716AEC-9BBA-4B29-818D-D9F01852136E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +76,14 @@ Global
 		{5E6A17F7-2112-49F5-8A69-A155DB0C2646}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E6A17F7-2112-49F5-8A69-A155DB0C2646}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E6A17F7-2112-49F5-8A69-A155DB0C2646}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F583BF2E-2287-490E-893A-8EC73448EB2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F583BF2E-2287-490E-893A-8EC73448EB2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F583BF2E-2287-490E-893A-8EC73448EB2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F583BF2E-2287-490E-893A-8EC73448EB2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A716AEC-9BBA-4B29-818D-D9F01852136E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A716AEC-9BBA-4B29-818D-D9F01852136E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A716AEC-9BBA-4B29-818D-D9F01852136E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A716AEC-9BBA-4B29-818D-D9F01852136E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890} = {B4A8C2E0-5C5E-4F0F-9E6A-7E2B5D8C5F1A}
@@ -84,5 +96,7 @@ Global
 		{CF7109F3-0F1F-41B7-B9BF-B9890D346229} = {C6B9D1E2-7D6F-4A1B-8F3C-9D4E5A6B7C8D}
 		{32EDB36C-C910-4F14-9641-4824DDA3FC95} = {B4A8C2E0-5C5E-4F0F-9E6A-7E2B5D8C5F1A}
 		{5E6A17F7-2112-49F5-8A69-A155DB0C2646} = {C6B9D1E2-7D6F-4A1B-8F3C-9D4E5A6B7C8D}
+		{F583BF2E-2287-490E-893A-8EC73448EB2A} = {B4A8C2E0-5C5E-4F0F-9E6A-7E2B5D8C5F1A}
+		{2A716AEC-9BBA-4B29-818D-D9F01852136E} = {C6B9D1E2-7D6F-4A1B-8F3C-9D4E5A6B7C8D}
 	EndGlobalSection
 EndGlobal
