@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace StandardTools.Screener;
 
 /// <summary>
@@ -5,19 +7,46 @@ namespace StandardTools.Screener;
 /// </summary>
 public sealed record ScreenCriteria
 {
+    [JsonPropertyName("pe_ratio_max")]
     public double? PERatioMax { get; init; }
+
+    [JsonPropertyName("pe_ratio_min")]
     public double? PERatioMin { get; init; }
+
+    [JsonPropertyName("pb_ratio_max")]
     public double? PBRatioMax { get; init; }
+
+    [JsonPropertyName("pb_ratio_min")]
     public double? PBRatioMin { get; init; }
+
+    [JsonPropertyName("market_cap_max")]
     public double? MarketCapMax { get; init; }
+
+    [JsonPropertyName("market_cap_min")]
     public double? MarketCapMin { get; init; }
+
+    [JsonPropertyName("dividend_yield_max")]
     public double? DividendYieldMax { get; init; }
+
+    [JsonPropertyName("dividend_yield_min")]
     public double? DividendYieldMin { get; init; }
+
+    [JsonPropertyName("eps_growth_max")]
     public double? EPSGrowthMax { get; init; }
+
+    [JsonPropertyName("eps_growth_min")]
     public double? EPSGrowthMin { get; init; }
+
+    [JsonPropertyName("debt_to_equity_max")]
     public double? DebtToEquityMax { get; init; }
+
+    [JsonPropertyName("debt_to_equity_min")]
     public double? DebtToEquityMin { get; init; }
+
+    [JsonPropertyName("roe_max")]
     public double? ROEMax { get; init; }
+
+    [JsonPropertyName("roe_min")]
     public double? ROEMin { get; init; }
 
     internal bool Apply(FundamentalData data)
