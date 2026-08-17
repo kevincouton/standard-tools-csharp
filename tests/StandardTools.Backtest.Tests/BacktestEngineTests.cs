@@ -98,6 +98,28 @@ public class BacktestEngineTests
     }
 
     [Fact]
+    public void ShortPosition_EquityRemainsPositiveWhileOpen()
+    {
+        var series = ConstantSeries(5, 100m);
+        var engine = new BacktestEngine(new AlwaysShortStrategy(), new BacktestConfig());
+        var result = engine.Run(series);
+
+        // Equity while short is open should be initial capital minus commission,
+        // not approximately zero.
+        var openEquity = result.EquityCurve[1].Equity;
+        Assert.True(openEquity > 99_000m, $"equity while short open was {openEquity}");
+        Assert.Equal(TradeSide.Short, result.Trades[0].Side);
+    }
+
+    private sealed class AlwaysShortStrategy : IStrategy
+    {
+        public string Name => "always_short";
+
+        public IReadOnlyList<SignalResult> Signals(IReadOnlyList<OHLCV> series, IReadOnlyDictionary<string, string> parameters) =>
+            series.Select((bar, i) => new SignalResult(bar.Date, i == 0 ? SignalType.Sell : SignalType.Hold)).ToArray();
+    }
+
+    [Fact]
     public void MonteCarlo_FromTrades()
     {
         var trade = new Trade(new DateOnly(2024, 1, 1), new DateOnly(2024, 1, 2), 100m, 110m, 10m, TradeSide.Long, 100m);

@@ -119,7 +119,8 @@ public sealed class BacktestEngine
         var quantity = price == 0 ? 0 : cash / (price * (1 + commission));
         var comm = quantity * price * commission;
         var position = new Position(TradeSide.Short, price, quantity, date);
-        return (position, cash - comm);
+        // Short sale proceeds are credited to cash immediately.
+        return (position, cash + quantity * price - comm);
     }
 
     private static (Trade Trade, decimal Cash) ClosePosition(Position position, decimal price, decimal commission, DateOnly date, decimal cash)
@@ -136,7 +137,8 @@ public sealed class BacktestEngine
         else
         {
             pnl = position.Quantity * (position.EntryPrice - price) - entryComm - exitComm;
-            newCash = cash + position.Quantity * position.EntryPrice - position.Quantity * price - exitComm;
+            // Cash already includes the short proceeds; pay the buy-back cost.
+            newCash = cash - position.Quantity * price - exitComm;
         }
 
         var trade = new Trade(position.EntryDate, date, position.EntryPrice, price, position.Quantity, position.Side, pnl);
