@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StandardTools.Core\StandardTools.Core.csproj" />
+    <ProjectReference Include="..\StandardTools.Indicators\StandardTools.Indicators.csproj" />
+    <ProjectReference Include="..\StandardTools.Metrics\StandardTools.Metrics.csproj" />
+    <ProjectReference Include="..\StandardTools.Analysis\StandardTools.Analysis.csproj" />
+    <ProjectReference Include="..\StandardTools.Backtest\StandardTools.Backtest.csproj" />
+    <ProjectReference Include="..\StandardTools.Portfolio\StandardTools.Portfolio.csproj" />
+    <ProjectReference Include="..\StandardTools.Screener\StandardTools.Screener.csproj" />
+    <ProjectReference Include="..\StandardTools.Audit\StandardTools.Audit.csproj" />
+  </ItemGroup>
+
+</Project>
