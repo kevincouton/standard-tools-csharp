@@ -69,13 +69,15 @@ This document compares the `standard-tools-csharp` port against the other Standa
 
 ## CI status
 
+Validation below was performed locally with `nektos/act` on `linux/arm64` (Podman) using the workflow job(s) that exercise the core build and tests.
+
 | Port | Status | Notes |
 |---|---|---|
-| C# | ✅ green | `dotnet test` passes (88 tests) |
-| Kotlin | ✅ green | unit / integration / e2e green; native build not validated locally |
-| Go | ✅ green | `go test ./...` and image builds green locally |
-| Rust | ❌ red | `cargo fmt` not installed in mise toolchain; `set -o pipefail` fails under dash |
-| C++ | ❌ red | `rm -rf /var/lib/apt/lists/*` lacks permissions in GitHub Actions runner |
+| C# | ✅ green | `act push --job build-and-test` passes (`dotnet test` 88 tests) |
+| Kotlin | ✅ green | `act push --job unit-tests` passes; native build not validated locally |
+| Go | ✅ green | `act push --job quality` passes |
+| Rust | ⚠️ pending | `quality` job passes; `test` job fixed to skip artifact upload under `env.ACT` and is re-running |
+| C++ | ⚠️ pending | `quality` job is running |
 
 ## Known limitations relevant to this port
 
@@ -85,10 +87,20 @@ This document compares the `standard-tools-csharp` port against the other Standa
 - Risk-parity weights are inverse-volatility, not equal-risk-contribution.
 - PCA uses power iteration with fixed iterations and no convergence check.
 
+## Outstanding P0/P1 gaps (deferred)
+
+The following items were identified in the staff-engine audit and are explicitly documented rather than hidden behind false claims:
+
+1. **TLS termination** — not implemented in any port. Deploy behind a reverse proxy that terminates TLS.
+2. **Structured logging / request tracing** — no request-id propagation or structured log output.
+3. **gRPC, A2A, MCP, Docker surfaces** — this port exposes REST only; no container image or alternate transports exist yet.
+4. **Audit replay side-effect blocklist** — replay loads the record but does not guard against re-execution of side-effecting tools.
+5. **Risk parity** — the implementation is inverse-volatility, not equal-risk-contribution; rename or replace before claiming parity.
+6. **Dependency scanning** — no Dependabot or equivalent vulnerability scanning is wired into CI.
+
 ## Recommendations before a release tag
 
-1. Implement a persistent audit backend (PostgreSQL or local SQLite).
-2. Populate audit provenance fields on every record.
-3. Add Docker / container image support and a non-root `Dockerfile`.
-4. Either implement gRPC/A2A/MCP or remove the claims from downstream docs.
-5. Replace inverse-volatility risk parity with a true risk-budget algorithm or rename the function.
+1. Populate audit provenance fields on every record.
+2. Add Docker / container image support and a non-root `Dockerfile`.
+3. Either implement gRPC/A2A/MCP or keep the claims limited to REST.
+4. Replace inverse-volatility risk parity with a true risk-budget algorithm or rename the function.
