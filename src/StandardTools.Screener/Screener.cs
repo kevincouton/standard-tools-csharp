@@ -1,3 +1,5 @@
+using StandardTools.Core;
+
 namespace StandardTools.Screener;
 
 /// <summary>
@@ -5,6 +7,8 @@ namespace StandardTools.Screener;
 /// </summary>
 public sealed class Screener
 {
+    public const int MaxTickers = 500;
+
     private readonly IFundamentalProvider _provider;
 
     public Screener(IFundamentalProvider provider)
@@ -20,6 +24,8 @@ public sealed class Screener
     {
         ArgumentNullException.ThrowIfNull(tickers);
         ArgumentNullException.ThrowIfNull(criteria);
+        if (tickers.Count > MaxTickers)
+            throw new InvalidCommandException($"screener supports at most {MaxTickers} tickers");
 
         var matches = new List<FundamentalData>();
         var failed = new List<string>();

@@ -13,12 +13,14 @@ public sealed record MonteCarloResult(
 /// </summary>
 public sealed class MonteCarloSimulator
 {
+    public const int MaxSimulations = 100_000;
+
     private readonly int _simulations;
     private readonly int? _seed;
 
     public MonteCarloSimulator(int simulations, int? seed = null)
     {
-        _simulations = Math.Max(0, simulations);
+        _simulations = Math.Clamp(simulations, 0, MaxSimulations);
         _seed = seed;
     }
 

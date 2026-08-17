@@ -32,6 +32,9 @@ public sealed record WalkForwardRequest(
 /// </summary>
 public sealed class WalkForwardOptimizer
 {
+    public const int MaxWindowSize = 10_000;
+    public const int MaxCombinations = 10_000;
+
     private readonly WalkForwardRequest _request;
 
     public WalkForwardOptimizer(WalkForwardRequest request)
@@ -39,6 +42,8 @@ public sealed class WalkForwardOptimizer
         _request = request;
         if (request.TrainSize <= 0 || request.TestSize <= 0)
             throw new InvalidCommandException("Train and test sizes must be positive");
+        if (request.TrainSize > MaxWindowSize || request.TestSize > MaxWindowSize)
+            throw new InvalidCommandException($"Train and test sizes must be <= {MaxWindowSize}");
         StrategyFactory.Create(request.Strategy);
     }
 
@@ -133,6 +138,8 @@ public sealed class WalkForwardOptimizer
                 }
             }
             combinations = next;
+            if (combinations.Count > MaxCombinations)
+                throw new InvalidCommandException($"Parameter grid produces more than {MaxCombinations} combinations");
         }
 
         return combinations;

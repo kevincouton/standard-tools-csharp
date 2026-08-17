@@ -7,6 +7,8 @@ namespace StandardTools.Backtest;
 /// </summary>
 public sealed class BacktestEngine
 {
+    public const int MaxSeriesLength = 50_000;
+
     private readonly IStrategy _strategy;
     private readonly BacktestConfig _config;
 
@@ -26,6 +28,8 @@ public sealed class BacktestEngine
     {
         if (series.Count == 0)
             throw new InvalidCommandException("Backtest requires a non-empty price series");
+        if (series.Count > MaxSeriesLength)
+            throw new InvalidCommandException($"Backtest series exceeds maximum of {MaxSeriesLength} bars");
 
         var parametersDictionary = parameters ?? new Dictionary<string, string>();
         var signals = _strategy.Signals(series, parametersDictionary);

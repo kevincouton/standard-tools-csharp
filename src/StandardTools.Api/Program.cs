@@ -14,6 +14,19 @@ using StandardTools.Screener;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 16 * 1024 * 1024;
+    options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
+});
+
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.ShutdownTimeout = TimeSpan.FromSeconds(30);
+});
+
+builder.Services.AddRequestTimeouts();
+
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
@@ -42,6 +55,8 @@ builder.Services.AddSingleton<AuditReplay>();
 builder.Services.AddSingleton<AgentDispatcher>();
 
 var app = builder.Build();
+
+app.UseRequestTimeouts();
 
 // API-key middleware: every request except /health must present x-api-key.
 app.Use(async (context, next) =>
@@ -279,10 +294,24 @@ app.MapPost("/api/v1/screener", async (ScreenerRequest request, CancellationToke
 });
 
 // Agent tools (A2A/MCP-style single endpoint)
-app.MapPost("/api/v1/agent/tools", async (ToolCallRequest request, AgentDispatcher dispatcher, CancellationToken cancellationToken) =>
+app.MapPost("/api/v1/agent/tools", async (ToolCallRequest request, AgentDispatcher dispatcher, AuditWriter auditWriter, CancellationToken cancellationToken) =>
 {
     var call = new ToolCall { Name = request.Name, Arguments = request.Arguments };
     var result = await dispatcher.DispatchAsync(call, cancellationToken);
+    var status = result.Error is null ? "ok" : "error";
+    var requestId = Guid.NewGuid().ToString();
+    await auditWriter.WriteAsync(new DecisionRecord
+    {
+        RequestID = requestId,
+        ToolName = request.Name,
+        Input = request.Arguments,
+        InputHash = string.Empty,
+        Output = result.Output,
+        OutputHash = string.Empty,
+        Status = status,
+        Error = result.Error,
+        RecordHash = string.Empty,
+    }, cancellationToken);
     return result.Error is null ? Results.Ok(result.Output) : Results.BadRequest(result.Output);
 });
 

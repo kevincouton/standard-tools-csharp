@@ -4,12 +4,16 @@ namespace StandardTools.Portfolio;
 
 internal static class Validation
 {
+    public const int MaxAssets = 100;
+
     public static bool IsFinite(double v) => !double.IsNaN(v) && !double.IsInfinity(v);
 
     public static void ValidateReturnMatrix(IReadOnlyList<IReadOnlyList<double>> returns, IReadOnlyList<string> labels)
     {
         if (returns.Count == 0)
             throw new DataQualityException("returns matrix must contain at least one series");
+        if (labels.Count > MaxAssets)
+            throw new InvalidCommandException($"portfolio optimization supports at most {MaxAssets} assets; got {labels.Count}");
         if (labels.Count != returns.Count)
             throw new InvalidCommandException($"expected {returns.Count} labels, got {labels.Count}");
 
