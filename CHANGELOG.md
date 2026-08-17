@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial release of the language port with quant modules: market data, indicators, metrics, analysis, backtest, portfolio, screener, audit, and agent tooling.
-- REST/gRPC/A2A/MCP adapters and comprehensive unit/integration tests.
-- CI workflow, Docker support, and project documentation.
+- REST API adapters and comprehensive unit/integration tests.
+- CI workflow and project documentation.
 
 ### Changed
 - N/A
